@@ -1,101 +1,116 @@
-import Image from "next/image";
+"use client";
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
-export default function Home() {
+interface BookHistoryItem {
+  id: string;
+  title: string | null;
+  author: string | null;
+  visitedAt: string; // ISO date string
+}
+
+const BookLookup = () => {
+  const [bookId, setBookId] = useState('');
+  const [bookHistory, setBookHistory] = useState<BookHistoryItem[]>([]);
+
+  // Get book history from cookies on component mount
+  useEffect(() => {
+    const bookHistoryCookie = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('book_history='));
+    
+    if (bookHistoryCookie) {
+      try {
+        const historyValue = bookHistoryCookie.split('=')[1];
+        const decodedValue = decodeURIComponent(historyValue);
+        const parsedHistory = JSON.parse(decodedValue);
+        setBookHistory(parsedHistory);
+      } catch (e) {
+        console.error('Failed to parse book history:', e);
+      }
+    }
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBookId(e.target.value);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen flex flex-col items-center bg-gray-50 dark:bg-gray-900 p-4">
+      {/* Added pt-16 for more space on top on desktop screens */}
+      <main className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mt-8 md:mt-16 lg:mt-24">
+        <h1 className="text-2xl font-bold text-center mb-6 text-gray-800 dark:text-gray-100">
+          Get started by typing in the book ID
+        </h1>
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <input
+            type="text"
+            value={bookId}
+            onChange={handleInputChange}
+            placeholder="Enter book ID..."
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+          />
+          <Link
+            className="w-full flex items-center justify-center gap-2 bg-black dark:bg-white text-white dark:text-black font-medium rounded-full py-3 px-4 transition-colors hover:bg-gray-800 dark:hover:bg-gray-200"
+            href={bookId ? `/book/${bookId}` : "#"}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            View the book
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+              <title>Arrow right</title>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            </svg>
+          </Link>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      {bookHistory.length > 0 && (
+        <div className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mt-8">
+          <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">
+            Your Reading History
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-100 dark:bg-gray-700">
+                  <th className="px-4 py-2 text-left text-gray-800 dark:text-gray-200">Title</th>
+                  <th className="px-4 py-2 text-left text-gray-800 dark:text-gray-200">Author</th>
+                  <th className="px-4 py-2 text-left text-gray-800 dark:text-gray-200">Last Visited</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bookHistory.map((book) => (
+                  <tr 
+                    key={book.id} 
+                    className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    <td className="px-4 py-3">
+                      <Link 
+                        href={`/book/${book.id}`}
+                        className="text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        {book.title || `Book #${book.id}`}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                      {book.author || 'Unknown'}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                      {formatDate(book.visitedAt)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default BookLookup;
